@@ -56,6 +56,16 @@ You should see a JSON response like:
 }
 ```
 
+## Vercel Deploy
+
+This backend is set up for Vercel serverless deployment.
+
+1. Connect the GitHub repository to your Vercel project once.
+2. Set `MONGO_URL` in the Vercel environment variables.
+3. Push to the connected branch, and Vercel will deploy automatically.
+
+The app uses `vercel.json` to route all requests to the serverless function in `api/index.js`.
+
 ## Folder Structure
 
 ```text
