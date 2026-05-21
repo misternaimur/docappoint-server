@@ -24,7 +24,7 @@ npm install
 
 ```bash
 PORT=5000
-MONGODB_URI=your_mongodb_atlas_connection_string_here
+MONGO_URL=your_mongodb_atlas_connection_string_here
 ```
 
 3. Run in development:

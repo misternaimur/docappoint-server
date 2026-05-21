@@ -9,9 +9,11 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8080;
-const uri =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://misternaimurwork_db_user:BJ2ibXm5FeY1OSXa@cluster0.62yyamw.mongodb.net/?appName=Cluster0";
+const uri = process.env.MONGO_URL;
+
+if (!uri) {
+  throw new Error("MONGO_URL is not defined");
+}
 
 const client = new MongoClient(uri, {
   serverApi: {
