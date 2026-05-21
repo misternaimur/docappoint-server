@@ -44,7 +44,8 @@ async function run() {
         res.send(result);
       } catch (error) {
         res.status(500).json({ message: "Failed to fetch doctors" });
-      }
+      } 
+      
     });
 
     await client.db("admin").command({ ping: 1 });
