@@ -22,8 +22,10 @@ app.get("/doctors", async (req, res) => {
     const result = await doctorsCollection.find().toArray();
     res.json(result);
   } catch (error) {
+    console.error("/doctors failed:", error);
     res.status(500).json({
       message: "Failed to fetch doctors",
+      error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
