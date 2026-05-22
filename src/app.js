@@ -46,28 +46,68 @@ app.get("/doctors", async (req, res) => {
   }
 });
 
-// Create a booking
-app.post("/booking", async (req, res) => {
+// get bookings for a user (by userId or by email)
+app.get("/bookings/:userId", async (req, res) => {
   try {
-    const { doctorId, userName, date, time, phone } = req.body || {};
-    if (!doctorId || !userName || !date || !time) {
+    const { userId } = req.params;
+    const bookingsCollection = await getBookingsCollection();
+    const query = userId.includes("@") ? { userEmail: userId } : { userId };
+    const result = await bookingsCollection.find(query).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error("/booking/:userId failed:", error);
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch bookings for user",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+  }
+});
+
+// Create a booking (accepts fields matching existing DB)
+app.post("/bookings", async (req, res) => {
+  try {
+    const {
+      userId,
+      userEmail,
+      doctorName,
+      patientName,
+      gender,
+      phone,
+      appointmentDate,
+      appointmentTime,
+    } = req.body || {};
+
+    if (
+      !userEmail ||
+      !doctorName ||
+      !patientName ||
+      !appointmentDate ||
+      !appointmentTime
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const bookings = await getBookingsCollection();
+    const now = new Date();
     const doc = {
-      doctorId,
-      userName,
-      date,
-      time,
+      userId: userId || null,
+      userEmail,
+      doctorName,
+      patientName,
+      gender: gender || null,
       phone: phone || null,
-      createdAt: new Date(),
+      appointmentDate,
+      appointmentTime,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const result = await bookings.insertOne(doc);
     res.status(201).json({ message: "Booking created", id: result.insertedId });
   } catch (error) {
-    console.error("/booking failed:", error);
+    console.error("/bookings failed:", error);
     res
       .status(500)
       .json({

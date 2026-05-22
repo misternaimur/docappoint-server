@@ -55,5 +55,5 @@ export async function getBookingsCollection() {
 
   const client = await clientPromise;
   const db = client.db("DocAppointdb");
-  return db.collection("Bookings-db");
+  return db.collection("bookings");
 }
