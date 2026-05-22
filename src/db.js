@@ -33,3 +33,27 @@ export async function getDoctorsCollection() {
   const db = client.db("DocAppointdb");
   return db.collection("Doctors-db");
 }
+
+export async function pingMongo() {
+  if (!clientPromise) {
+    clientPromise =
+      globalThis.__docAppointMongoClientPromise ?? createClientPromise();
+    globalThis.__docAppointMongoClientPromise = clientPromise;
+  }
+
+  const client = await clientPromise;
+  await client.db("admin").command({ ping: 1 });
+  return true;
+}
+
+export async function getBookingsCollection() {
+  if (!clientPromise) {
+    clientPromise =
+      globalThis.__docAppointMongoClientPromise ?? createClientPromise();
+    globalThis.__docAppointMongoClientPromise = clientPromise;
+  }
+
+  const client = await clientPromise;
+  const db = client.db("DocAppointdb");
+  return db.collection("Bookings-db");
+}
