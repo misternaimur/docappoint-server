@@ -47,7 +47,7 @@ app.get("/doctors", async (req, res) => {
 });
 
 // get bookings for a user (by userId or by email)
-app.get("/bookings/:userId", async (req, res) => {
+app.get("/bookings/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const bookingsCollection = await getBookingsCollection();
@@ -55,13 +55,81 @@ app.get("/bookings/:userId", async (req, res) => {
     const result = await bookingsCollection.find(query).toArray();
     res.json(result);
   } catch (error) {
-    console.error("/booking/:userId failed:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch bookings for user",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    console.error("/bookings/user/:userId failed:", error);
+    res.status(500).json({
+      message: "Failed to fetch bookings for user",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+// edit a booking by booking_id
+app.put("/bookings/:bookingId", async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const updates = req.body || {};
+    const bookingsCollection = await getBookingsCollection();
+
+    const allowedFields = [
+      "userId",
+      "userEmail",
+      "doctorName",
+      "patientName",
+      "gender",
+      "phone",
+      "appointmentDate",
+      "appointmentTime",
+    ];
+
+    const updateDoc = {};
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        updateDoc[field] = updates[field];
+      }
+    }
+
+    updateDoc.updatedAt = new Date();
+
+    const result = await bookingsCollection.findOneAndUpdate(
+      { _id: bookingId },
+      { $set: updateDoc },
+      { returnDocument: "after" },
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.json({ message: "Booking updated", data: result });
+  } catch (error) {
+    console.error("/bookings/:bookingId update failed:", error);
+    res.status(500).json({
+      message: "Failed to update booking",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+// delete a booking by booking_id
+app.delete("/bookings/:bookingId", async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const bookingsCollection = await getBookingsCollection();
+    const result = await bookingsCollection.findOneAndDelete({
+      _id: bookingId,
+    });
+
+    if (!result) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.json({ message: "Booking deleted", data: result });
+  } catch (error) {
+    console.error("/bookings/:bookingId delete failed:", error);
+    res.status(500).json({
+      message: "Failed to delete booking",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 });
 
@@ -108,12 +176,10 @@ app.post("/bookings", async (req, res) => {
     res.status(201).json({ message: "Booking created", id: result.insertedId });
   } catch (error) {
     console.error("/bookings failed:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to create booking",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      message: "Failed to create booking",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 });
 
@@ -125,12 +191,10 @@ app.get("/bookings", async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error("/bookings failed:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch bookings",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      message: "Failed to fetch bookings",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 });
 
